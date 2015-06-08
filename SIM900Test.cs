@@ -13,6 +13,9 @@ namespace SIM900
     public partial class Form1 : Form
     {
         private SerialPort port;
+        private List<string> history = new List<string>();
+        private int historyIndex = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -30,7 +33,30 @@ namespace SIM900
 
                 SendCommand(inputBox.Text, (e.KeyValue == 13 ? 13 : 26) );
 
+                history.Add(inputBox.Text);
+                historyIndex = history.Count;
+
                 inputBox.Text = "";
+            }
+            else if (e.KeyCode == Keys.Up)
+            {
+                if (historyIndex > 0)
+                    historyIndex--;
+                if( history.Count > 0)
+                    inputBox.Text = history.ToArray()[historyIndex];
+            }
+            else if (e.KeyCode == Keys.Down)
+            {
+                if (historyIndex < history.Count - 1)
+                {
+                    historyIndex++;
+                    inputBox.Text = history.ToArray()[historyIndex];
+                }
+                else
+                {
+                    inputBox.Text = "";
+                }
+
             }
         }
 
@@ -70,6 +96,7 @@ namespace SIM900
             port = new SerialPort("COM3");
             port.BaudRate = 9600;
             port.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+            port.Encoding = Encoding.GetEncoding("utf-8");
 
             port.Open();
 
